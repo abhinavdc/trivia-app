@@ -20,6 +20,26 @@
  (fn [db [_ val]]
    (assoc db :answer val)))
 
+(re-frame/reg-event-db
+ :index
+ (fn [db [_ val]]
+   (assoc db :index val)))
+
+(re-frame/reg-event-db
+ :status
+ (fn [db [_ val]]
+   (assoc db :status val)))
+
+(re-frame/reg-event-db
+ :score
+ (fn [db [_ val]]
+   (assoc db :score val)))
+
+(re-frame/reg-event-db
+ :data
+ (fn [db [_ val]]
+   (assoc db :data val)))
+
 (re-frame/reg-event-db                   
  :process-response             
  (fn

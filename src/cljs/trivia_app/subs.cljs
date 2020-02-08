@@ -23,6 +23,21 @@
    (:answer db)))
 
 (re-frame/reg-sub
+ :index
+ (fn [db _]
+   (:index db)))
+
+(re-frame/reg-sub
+ :status
+ (fn [db _]
+   (:status db)))
+
+(re-frame/reg-sub
+ :score
+ (fn [db _]
+   (:score db)))
+
+(re-frame/reg-sub
  :data
  (fn [db _]
    (:data db)))
