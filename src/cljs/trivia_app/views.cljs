@@ -2,7 +2,7 @@
   (:require
    [re-frame.core :as re-frame]
    [trivia-app.subs :as subs]
-   ))
+   [goog.string :as gstring]))
 
 (defn get-question []
   (re-frame/dispatch [:data nil])
@@ -10,11 +10,10 @@
   (re-frame/dispatch [:index 0])
   (re-frame/dispatch [:score 0])
   (re-frame/dispatch [:status :start])
-  (re-frame/dispatch [:answer ""])
-  )
+  (re-frame/dispatch [:answer ""]))
 
-(defn loader [] 
-          [:div {:class "loader"}])
+(defn loader []
+  [:div {:class "loader"}])
 
 
 (defn lock-answer [answer correct_answer]
@@ -25,35 +24,20 @@
         (do
           (re-frame/dispatch [:answer "Right Answer"])
           (re-frame/dispatch [:score (+ @score 1)]))
-        (re-frame/dispatch [:answer (str "Incorrect answer, it is " correct_answer)])) nil)))
+        (re-frame/dispatch [:answer (str "Incorrect answer, it is " (gstring/unescapeEntities correct_answer))])) nil)))
 
-(defn parse-question [data index] 
-  (if (some-> data) (get (nth data index) "question") nil))
+(defn parse-question [data index]
+  (if (some-> data) (gstring/unescapeEntities (get (nth data index) "question")) nil))
 
 (defn parse-options [data index]
-  (let [answer (re-frame/subscribe [:answer])]
   (if (some-> data)
     (for [item
           (shuffle (conj (get (nth data index) "incorrect_answers") (get (nth data index) "correct_answer")))]
-      ; [:li [:button {:on-click #(lock-answer item (get (nth data index) "correct_answer"))} item]]
-      [:label {:on-click #(lock-answer item (get (nth data index) "correct_answer"))} item])
-    nil)))
+      [:label {:on-click #(lock-answer item (get (nth data index) "correct_answer"))} (gstring/unescapeEntities item)])
+    nil))
 
-; <div id="question">
-; <h2>Who is the main character of Harry Potter?</h2>
-; <input id="choices-0" type="radio" name="choices" value="choices-0">
-; <label for="choices-0">Hermione Granger</label>
-; <input id="choices-1" type="radio" name="choices" value="choices-1">
-; <label for="choices-1">Harry Potter</label>
-; <input id="choices-2" type="radio" name="choices" value="choices-2">
-; <label for="choices-2">Ron Weasley</label>
-; <input id="choices-3" type="radio" name="choices" value="choices-3">
-; <label for="choices-3">Voldemort</label>
-; </div>
-
-(defn stop-quiz [] 
-  (re-frame/dispatch [:status :stop])
-  )
+(defn stop-quiz []
+  (re-frame/dispatch [:status :stop]))
 
 (defn next-question [index]
   (if (>= index 9)
@@ -65,10 +49,10 @@
 (defn main-panel []
   (let [loading (re-frame/subscribe [:loading?])
         data    (re-frame/subscribe [:data])
-        index    (re-frame/subscribe [:index])
-        score    (re-frame/subscribe [:score])
-        status    (re-frame/subscribe [:status])
-        answer   (re-frame/subscribe [:answer])]
+        index   (re-frame/subscribe [:index])
+        score   (re-frame/subscribe [:score])
+        status  (re-frame/subscribe [:status])
+        answer  (re-frame/subscribe [:answer])]
     [:div
      [:div {:id "quiz"}
       [:h1 {:id "quiz-name"} "Trivia Quiz"]
@@ -77,8 +61,7 @@
        (if (= @status :initial) [:h2 "Welcome to Trivia Quiz. Press 'Play' to begin."] nil)
        [:h2 (parse-question @data @index)]
        (parse-options @data @index)
-       [:h3 @answer]
-       ]
+       [:h3 @answer]]
       (if (and (= @status :start) (not @loading))
         [:button {:id       "submit-button"
                   :on-click #(stop-quiz)} "Quit"]
@@ -88,15 +71,13 @@
         [:button {:id       "next-question-button"
                   :on-click #(next-question @index)} "Next Question"]
         nil)
-      
+
       (if (= @status :stop)
         [:div {:id "quiz-results"}
          [:p {:id "quiz-results-message"}
-          (if (< @score 5) 
+          (if (< @score 5)
             "You should try little harder"
-            "You did great")
-          ]
+            "You did great")]
          [:p {:id "quiz-results-score"} (str "Your got " @score " /10" " questions correct")]]
-        nil)]
-     ]))
+        nil)]]))
 

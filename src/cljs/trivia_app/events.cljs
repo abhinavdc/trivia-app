@@ -65,7 +65,7 @@
 
     ;; kick off the GET, making sure to supply a callback for success and failure
    (GET
-     "https://opentdb.com/api.php?amount=10"
+     "https://opentdb.com/api.php?amount=10&difficulty=easy"
      {:handler       #(re-frame/dispatch [:process-response %1])   ;; <2> further dispatch !!
       :error-handler #(re-frame/dispatch [:bad-response %1])})     ;; <2> further dispatch !!
 
