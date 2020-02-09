@@ -75,9 +75,11 @@
       (if (= @status :stop)
         [:div {:id "quiz-results"}
          [:p {:id "quiz-results-message"}
-          (if (< @score 5)
+          (if (< @score 3)
             "You should try little harder"
-            "You did great")]
+            (if (> score 8)
+              "Take a bow Trivia Guru"
+              "You did good"))]
          [:p {:id "quiz-results-score"} (str "Your got " @score " /10" " questions correct")]]
         nil)]]))
 
