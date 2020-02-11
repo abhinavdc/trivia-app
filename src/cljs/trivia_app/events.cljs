@@ -1,9 +1,11 @@
 (ns trivia-app.events
   (:require
-   [ajax.core :refer [GET POST]]
+   [ajax.core :refer [GET]]
    [re-frame.core :as re-frame]
    [trivia-app.db :as db]
-   ))
+   [camel-snake-kebab.core :refer [->kebab-case-keyword]]
+   [camel-snake-kebab.extras :refer [transform-keys]]
+   [goog.string :as gstring]))
 
 (re-frame/reg-event-db
  ::initialize-db
@@ -11,7 +13,7 @@
    db/default-db))
 
 (re-frame/reg-event-db
- :time-color-change            ;; usage:  (rf/dispatch [:time-color-change 34562])
+ :time-color-change
  (fn [db [_ new-color-value]]
    (assoc db :time-color new-color-value)))
 
@@ -40,14 +42,26 @@
  (fn [db [_ val]]
    (assoc db :data val)))
 
-(re-frame/reg-event-db                   
- :process-response             
+(re-frame/reg-event-db
+ :process-response
  (fn
    [db [_ response]]           ;; destructure the response from the event vector
+   (let [results-data (->> (js->clj response)
+                           (transform-keys ->kebab-case-keyword)
+                           :results
+                           (map (fn [{:keys [question correct-answer incorrect-answers]
+                                      :as   q}]
+                                  {:options        (->> (concat incorrect-answers [correct-answer])
+                                                        (map gstring/unescapeEntities)
+                                                        (shuffle))
+                                   :question       (gstring/unescapeEntities question)
+                                   :correct-answer (gstring/unescapeEntities correct-answer)})))]
    (-> db
        (assoc :loading? false) ;; take away that "Loading ..." UI 
-       (assoc :data (js->clj (get response "results")))))  ;; fairly lame processing
-   )  ;; fairly lame processing
+       (assoc :data results-data)
+       ))  
+     )
+ )
 
 (re-frame/reg-event-db                   
  :bad-response             
@@ -71,3 +85,35 @@
 
      ;; update a flag in `app-db` ... presumably to cause a "Loading..." UI 
    (assoc db :loading? true)))    ;; <3> return an updated db 
+
+(defn current-question [db]
+  (nth (:data db) (:index db)))
+
+(re-frame/reg-event-db
+ :get-question
+(fn [db] 
+  (re-frame/dispatch [:request-it])
+  (assoc (dissoc db :answer)
+         :index 0
+         :score 0
+         :status :start)))
+
+(re-frame/reg-event-db
+ :next-question
+ (fn [db] 
+   (if (>= (:index db) 9)
+     (assoc db :status :stop)
+     (assoc (dissoc db :answer)
+          :index (inc (:index db))))))
+
+(re-frame/reg-event-db 
+ :sumbit-answer
+ (fn
+   [db [_ attempted-answer]]
+   (let [correct-answer (:correct-answer (current-question db))
+         correct?       (= attempted-answer correct-answer)]
+     (cond-> (assoc db :answer (if correct?
+                                 "Right Answer"
+                                 (str "Incorrect answer, it is "  correct-answer)))
+       correct? (assoc :score (inc (:score db))))
+     )))

@@ -7,7 +7,8 @@
                  [thheller/shadow-cljs "2.8.83"]
                  [reagent "0.9.1"]
                  [re-frame "0.11.0"]
-                 [cljs-ajax "0.8.0"]]
+                 [cljs-ajax "0.8.0"]
+                 [camel-snake-kebab "0.4.1"]]
 
   :plugins [
             [lein-shell "0.5.0"]]
