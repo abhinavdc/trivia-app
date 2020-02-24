@@ -51,10 +51,10 @@
         cur-question- (nth @data- @index-)]
     [:div
      [:div {:id "quiz"}
-      [:h1 {:id "quiz-name"} "Trivia Quiz"]
+      [:h1 {:id "quiz-name"} "Trivia"]
       [:div {:id "question"}
        (when @loading- [loader])
-       (when (= @status- :initial) [:h2 "Welcome to Trivia Quiz. Press 'Play' to begin."])
+       (when (= @status- :initial) [:h2 "Test your Trivia quotient. Press 'Play' to begin."])
        [:h2 (:question cur-question-)]
        [question-options cur-question-]
        [:h3 @answer-]]
