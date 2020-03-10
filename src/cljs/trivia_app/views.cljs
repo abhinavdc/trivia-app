@@ -21,7 +21,7 @@
   [:div 
   (if (and (= status :start) (not loading?))
     [:button {:id       "submit-button"
-              :on-click #(re-frame/dispatch [status :stop])} "Quit"]
+              :on-click #(re-frame/dispatch [:status :stop])} "Quit"]
     [:button {:id       "submit-button"
               :on-click #(re-frame/dispatch [:get-question])} (if (= status :stop) "Play Again" "Play")])
   (when (= status :start)
@@ -60,6 +60,6 @@
        [:h3 @answer-]]
       [buttons {:status   @status-
                 :loading? @loading-}]
-      (while (= @status- :stop)
+      (when (= @status- :stop)
         [result @score-])]]))
 
