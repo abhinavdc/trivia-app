@@ -1,7 +1,7 @@
 # trivia-app
+Test your trivia knowledge using the Trivia App. Built this to learn Clojure. Leverages the Open Trivia DB for trivia questions.
 
-A [re-frame](https://github.com/day8/re-frame) application designed to ... well, that part is up to
-you.
+![image](https://github.com/user-attachments/assets/6e367cf7-dcb5-4140-88f0-179dea22974a)
 
 ## Getting Started
 
